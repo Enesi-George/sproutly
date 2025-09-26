@@ -15,9 +15,7 @@ test('authenticated user can view their wallet', function () {
     $wallet = Wallet::factory()->create(['user_id' => $user->id, 'balance' => 10000]);
 
     $response = $this->actingAs($user, 'sanctum')->getJson(route('wallet.show'));
-    $userId = $response->json('data.user.id');
-    $email = $response->json('data.user.email');
-
+ 
     $response->assertStatus(200)
         ->assertJson([
             'status' => true,
@@ -48,7 +46,9 @@ test('authenticated user can list their transactions', function () {
     $response->assertStatus(200)
         ->assertJson([
             'status' => true,
-            'message' => 'List of transactions',
+            'message' => 'Request is successful',
+            "current_page" => 1,
+            "per_page" => 10
         ])
         ->assertJsonCount(3, 'data');
 });

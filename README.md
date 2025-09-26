@@ -1,12 +1,13 @@
 # Sproutly - Transaction Ledger API
 
-A Laravel-based transaction ledger system with real-time event streaming using Apache Kafka.
+A microservice Laravel-based transaction ledger api with real-time event streaming.
 
 ## Features
-
+-   Microservice architecture
 -   Wallet management with debit/credit transactions
 -   Real-time event streaming with Kafka
--   RESTful API with  documentation
+-   Excel Exportation for transacton history
+-   RESTful API with documentation
 -   Dockerized development environment
 -   PEST test 
 

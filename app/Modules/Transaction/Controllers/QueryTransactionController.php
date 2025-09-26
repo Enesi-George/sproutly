@@ -35,7 +35,7 @@ class QueryTransactionController extends Controller
         $user = $request->user();
         $result = $this->queryTransactionAction->listTransactions($user);
 
-        return $this->successApiResponse('List of transactions', TransactionResource::collection($result), 200);
+        return $this->paginatedApiResponse(TransactionResource::collection($result));
     }
 
     /**
