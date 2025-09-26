@@ -7,7 +7,7 @@ A microservice Laravel-based transaction ledger api with real-time event streami
 -   Wallet management with debit/credit transactions
 -   Real-time event streaming with Kafka
 -   Excel Exportation for transacton history
--   RESTful API with documentation
+-   RESTful API with Scramble documentation
 -   Dockerized development environment
 -   PEST test 
 
@@ -21,7 +21,7 @@ A microservice Laravel-based transaction ledger api with real-time event streami
 1. Clone the repository:
 
 ```bash
-git clone <your-repo-url>
+git clone https://github.com/Enesi-George/sproutly.git
 cd sproutly
 ```
 
