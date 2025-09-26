@@ -17,19 +17,6 @@ class ModulesServiceProvider extends ServiceProvider
     /**
      * Bootstrap services.
      */
-    // public function boot(): void
-    // {
-    //     $modules = ['Auth', 'User'];
-
-    //     foreach ($modules as $module) {
-    //         $routesPath = base_path("app/Modules/{$module}/routes.php");
-    //         if (file_exists($routesPath)) {
-    //             require $routesPath;
-    //         }
-    //     }
-    // }
-
-    // //auto detect modules
     public function boot()
     {
         $modulesPath = base_path('app/Modules');
