@@ -7,7 +7,6 @@ use App\Modules\Transaction\Jobs\LogCompletedExport;
 use App\Modules\Transaction\Models\Transaction;
 use App\Modules\Transaction\Models\Wallet;
 use Illuminate\Support\Facades\Auth;
-use Maatwebsite\Excel\Facades\Excel;
 
 class QueryTransactionAction
 {

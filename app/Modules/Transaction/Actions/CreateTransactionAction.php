@@ -5,12 +5,15 @@ namespace App\Modules\Transaction\Actions;
 use App\Modules\Transaction\Models\Transaction;
 use App\Modules\Transaction\Models\Wallet;
 use App\Modules\Transaction\Services\ReferenceGeneratorService;
+use App\Services\KafkaProducerService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
 class CreateTransactionAction
 {
+
+  public function __construct(private readonly KafkaProducerService $kafkaProducerService) {}
 
   public function create($dto)
   {
@@ -50,6 +53,14 @@ class CreateTransactionAction
         $wallet->save();
 
         $transaction->update(['status' => 'success']);
+
+        $this->kafkaProducerService->produceTransaction([
+          'user_id'   => $transaction->user_id,
+          'entry'     => $transaction->entry,
+          'amount'    => number_format($transaction->amount / 100, 2),
+          'balance'   => number_format($wallet->balance / 100, 2),
+          'timestamp' => now()->toISOString(),
+        ]);
       } catch (\Throwable $e) {
         $transaction->update(['status' => 'fail']);
         throw $e;

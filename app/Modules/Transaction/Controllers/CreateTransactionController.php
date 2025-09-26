@@ -17,7 +17,7 @@ class CreateTransactionController extends Controller
     public function __construct(private readonly CreateTransactionAction $createTransactionAction) {}
 
     /**
-     * Create transaction
+     * Create transaction (amount in kobo)
      */
     public function create(TransactionRequest $request){
         $validatedBody = $request->validated();

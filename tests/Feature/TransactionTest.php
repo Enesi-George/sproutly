@@ -4,10 +4,10 @@ namespace Tests\Feature;
 
 use App\Models\User;
 use App\Modules\Transaction\Exports\TransactionExport;
-use App\Modules\Transaction\Jobs\LogCompletedExport;
 use App\Modules\Transaction\Models\Transaction;
 use App\Modules\Transaction\Models\Wallet;
-use Illuminate\Support\Facades\Queue;
+use App\Services\KafkaProducerService;
+use Junges\Kafka\Facades\Kafka;
 use Maatwebsite\Excel\Facades\Excel;
 
 test('authenticated user can view their wallet', function () {
@@ -57,6 +57,19 @@ test('authenticated user can create a debit transaction', function () {
     $user = User::factory()->create();
     $wallet = Wallet::factory()->create(['user_id' => $user->id, 'balance' => 5000]);
 
+    // Mock the Kafka service
+    $kafkaService = $this->mock(KafkaProducerService::class);
+    $kafkaService->shouldReceive('produceTransaction')
+        ->once()
+        ->with(\Mockery::on(function ($data) use ($user) {
+            return $data['user_id'] === $user->id
+                && $data['entry'] === 'debit'
+                && $data['amount'] === '10.00'
+                && $data['balance'] === '40.00'
+                && isset($data['timestamp']);
+        }))
+        ->andReturn(true);
+
     $transactionData = [
         'amount' => 1000,
         'entry' => 'debit',
@@ -84,29 +97,22 @@ test('authenticated user can create a debit transaction', function () {
     ]);
 });
 
-test('authenticated user cannot have a negative balance', function () {
-    $user = User::factory()->create();
-    $wallet = Wallet::factory()->create(['user_id' => $user->id, 'balance' => 5000]);
-
-    $transactionData = [
-        'amount' => 6000,
-        'entry' => 'debit',
-    ];
-
-    $response = $this->actingAs($user, 'sanctum')->postJson(route('transaction.create'), $transactionData);
-
-    $response->assertStatus(422)
-        ->assertJson([
-            'status' => 'failed',
-            'errors' => [
-                'amount' => ['Insufficient balance']
-            ]
-        ]);
-});
-
 test('authenticated user can create a credit transaction', function () {
     $user = User::factory()->create();
     $wallet = Wallet::factory()->create(['user_id' => $user->id, 'balance' => 5000]);
+
+    // Mock the Kafka service
+    $kafkaService = $this->mock(KafkaProducerService::class);
+    $kafkaService->shouldReceive('produceTransaction')
+        ->once()
+        ->with(\Mockery::on(function ($data) use ($user) {
+            return $data['user_id'] === $user->id
+                && $data['entry'] === 'credit'
+                && $data['amount'] === '10.00'
+                && $data['balance'] === '60.00'
+                && isset($data['timestamp']);
+        }))
+        ->andReturnNull();
 
     $transactionData = [
         'amount' => 1000,
@@ -133,6 +139,28 @@ test('authenticated user can create a credit transaction', function () {
         'id' => $wallet->id,
         'balance' => 6000,
     ]);
+});
+
+
+
+test('authenticated user cannot have a negative balance', function () {
+    $user = User::factory()->create();
+    $wallet = Wallet::factory()->create(['user_id' => $user->id, 'balance' => 5000]);
+
+    $transactionData = [
+        'amount' => 6000,
+        'entry' => 'debit',
+    ];
+
+    $response = $this->actingAs($user, 'sanctum')->postJson(route('transaction.create'), $transactionData);
+
+    $response->assertStatus(422)
+        ->assertJson([
+            'status' => 'failed',
+            'errors' => [
+                'amount' => ['Insufficient balance']
+            ]
+        ]);
 });
 
 test('authenticated user can export transactions', function () {
